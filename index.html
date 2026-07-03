@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>妙脆苑 - Minecraft 公会官网</title>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            image-rendering: pixelated;
+        }
+
+        .pixel-font {
+            font-family: 'Press Start 2P', monospace;
+        }
+
+        .mc-border {
+            border: 4px solid #000;
+            box-shadow:
+                inset -4px -4px 0px 0px #555,
+                inset 4px 4px 0px 0px #fff;
+        }
+
+        .mc-button {
+            background: #727272;
+            border: 4px solid #000;
+            box-shadow:
+                inset -4px -4px 0px 0px #3a3a3a,
+                inset 4px 4px 0px 0px #bababa;
+            transition: all 0.1s;
+            cursor: pointer;
+        }
+
+        .mc-button:hover {
+            background: #919191;
+        }
+
+        .mc-button:active {
+            box-shadow:
+                inset 4px 4px 0px 0px #3a3a3a,
+                inset -4px -4px 0px 0px #bababa;
+        }
+
+        .mc-button.active {
+            background: #3d8b3d;
+        }
+
+        .skill-bar {
+            height: 24px;
+            background: #333;
+            border: 3px solid #000;
+            box-shadow: inset 2px 2px 0px #111;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .skill-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to bottom, #5dff5d 0%, #2db82d 50%, #1a8a1a 100%);
+            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3);
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .skill-fill.animated {
+            width: var(--skill-level);
+        }
+
+        .dirt-bg {
+            background-color: #795a34;
+            background-image:
+                radial-gradient(circle at 20% 30%, #8b6a3f 2px, transparent 2px),
+                radial-gradient(circle at 70% 60%, #6b4f2e 3px, transparent 3px),
+                radial-gradient(circle at 40% 80%, #8b6a3f 2px, transparent 2px);
+            background-size: 32px 32px;
+        }
+
+        .stone-bg {
+            background-color: #808080;
+            background-image:
+                radial-gradient(circle at 25% 25%, #909090 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, #707070 2px, transparent 2px);
+            background-size: 16px 16px;
+        }
+
+        .card-hover {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-link {
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: #5dff5d;
+            transition: width 0.3s;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        @keyframes float {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .float-anim {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .scrollbar-mc::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .scrollbar-mc::-webkit-scrollbar-track {
+            background: #333;
+            border: 2px solid #000;
+        }
+
+        .scrollbar-mc::-webkit-scrollbar-thumb {
+            background: #727272;
+            border: 2px solid #000;
+        }
+
+        /* 首页视频背景 */
+        .hero-video-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .hero-video-container video {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 表单输入框样式 */
+        .mc-input {
+            background: #222;
+            border: 3px solid #000;
+            box-shadow: inset 2px 2px 0px #111;
+            color: #fff;
+            padding: 8px 12px;
+            font-family: inherit;
+            outline: none;
+            width: 100%;
+        }
+
+        .mc-input:focus {
+            border-color: #5dff5d;
+        }
+
+        .mc-select {
+            background: #333;
+            border: 3px solid #000;
+            color: #fff;
+            padding: 8px 12px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* 技能滑块 */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #222;
+            border: 2px solid #000;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #5dff5d;
+            border: 3px solid #000;
+            cursor: pointer;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: #444;
+            border: 3px solid #000;
+            color: #aaa;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+        }
+
+        .tab-btn.active {
+            background: #3d8b3d;
+            color: #fff;
+        }
+
+        /* ========== 隐藏小眼睛样式 ========== */
+        .hidden-eye {
+            position: absolute;
+            bottom: 10px;
+            right: 12px;
+            width: 22px;
+            height: 22px;
+            opacity: 0.25;
+            cursor: pointer;
+            transition: opacity 0.35s, transform 0.35s;
+            z-index: 10;
+            filter: grayscale(0.6);
+        }
+
+        .hidden-eye:hover {
+            opacity: 0.75;
+            transform: scale(1.2);
+            filter: grayscale(0);
+        }
+
+        .hidden-eye.authenticated {
+            opacity: 0.55;
+            filter: grayscale(0) drop-shadow(0 0 3px rgba(100, 255, 100, 0.6));
+            animation: eye-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes eye-glow {
+            0%,
+            100% {
+                filter: grayscale(0) drop-shadow(0 0 3px rgba(100, 255, 100, 0.5));
+            }
+            50% {
+                filter: grayscale(0) drop-shadow(0 0 8px rgba(100, 255, 100, 0.9));
+            }
+        }
+
+        /* ========== 密码弹窗遮罩 ========== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-dialog {
+            background: #2a2a2a;
+            border: 4px solid #000;
+            box-shadow:
+                inset -4px -4px 0px 0px #1a1a1a,
+                inset 4px 4px 0px 0px #555,
+                0 0 0 8px rgba(0, 0, 0, 0.4);
+            padding: 28px 24px 24px;
+            max-width: 400px;
+            width: 90%;
+            animation: modalPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes modalPop {
+            from {
+                transform: scale(0.85);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-input-error {
+            border-color: #ff4444 !important;
+            box-shadow: inset 2px 2px 0px #111, 0 0 8px rgba(255, 60, 60, 0.4) !important;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(-6px);
+            }
+            40% {
+                transform: translateX(6px);
+            }
+            60% {
+                transform: translateX(-4px);
+            }
+            80% {
+                transform: translateX(4px);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white scrollbar-mc">
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 left-0 right-0 z-50 stone-bg border-b-4 border-black">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-green-500 mc-border flex items-center justify-center">
+                        <span class="pixel-font text-xs">妙</span>
+                    </div>
+                    <h1 class="pixel-font text-lg text-green-400 drop-shadow-lg">妙脆苑</h1>
+                </div>
+                <div class="hidden md:flex items-center gap-6 pixel-font text-xs">
+                    <a href="#home" class="nav-link hover:text-green-400 transition-colors">首页</a>
+                    <a href="#server" class="nav-link hover:text-green-400 transition-colors">服务器</a>
+                    <a href="#territory" class="nav-link hover:text-green-400 transition-colors">领地</a>
+                    <a href="#members" class="nav-link hover:text-green-400 transition-colors">成员</a>
+                    <!-- 管理链接默认隐藏，验证通过后显示 -->
+                    <a href="#admin" id="adminNavLink" class="nav-link hover:text-yellow-400 transition-colors text-yellow-400 hidden">管理</a>
+                </div>
+                <button class="mc-button px-4 py-2 pixel-font text-xs text-white">
+                    加入我们
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 首页英雄区（全屏背景视频） -->
+    <section id="home" class="min-h-screen pt-20 flex items-center justify-center relative overflow-hidden">
+        <!-- 视频背景预留 -->
+        <div class="hero-video-container">
+            <!-- 将下面 video 标签的 src 替换为你的视频地址即可 -->
+            <video autoplay muted loop playsinline poster="">
+                <source src="" type="video/mp4">
+                <!-- 视频加载失败时降级为泥土背景 -->
+            </video>
+        </div>
+
+        <!-- 遮罩层 -->
+        <div class="hero-overlay dirt-bg opacity-60"></div>
+
+        <!-- 内容 -->
+        <div class="hero-content text-center px-4 w-full">
+            <div class="float-anim mb-8">
+                <div class="w-32 h-32 mx-auto bg-green-500 mc-border flex items-center justify-center mb-6">
+                    <span class="pixel-font text-4xl">妙</span>
+                </div>
+            </div>
+            <h1 class="pixel-font text-3xl md:text-5xl text-green-400 mb-4 drop-shadow-[4px_4px_0_rgba(0,0,0,0.8)]">
+                妙脆苑
+            </h1>
+            <p class="pixel-font text-sm md:text-base text-gray-300 mb-2">MIAOCUIYUAN GUILD</p>
+            <div class="flex items-center justify-center gap-4 mb-8">
+                <div class="h-px w-16 bg-green-500"></div>
+                <span class="pixel-font text-xs text-yellow-400">味真族 × 妙脆苑 联合呈现</span>
+                <div class="h-px w-16 bg-green-500"></div>
+            </div>
+            <p class="text-gray-300 max-w-xl mx-auto mb-10 leading-relaxed">
+                两大公会强强联合，打造最温馨的 Minecraft 社区。<br>
+                生存、建筑、红石、PVE，这里有你想要的一切。
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#members" class="mc-button px-8 py-3 pixel-font text-xs text-white inline-block">
+                    查看成员
+                </a>
+                <a href="#server" class="mc-button px-8 py-3 pixel-font text-xs text-white inline-block">
+                    服务器介绍
+                </a>
+            </div>
+        </div>
+
+        <!-- 底部渐变 -->
+        <div class="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-gray-900 to-transparent z-10"></div>
+    </section>
+
+    <!-- 服务器介绍 -->
+    <section id="server" class="py-20 bg-gray-900">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="pixel-font text-2xl text-green-400 mb-4">服务器介绍</h2>
+                <div class="w-24 h-1 bg-green-500 mx-auto mb-6"></div>
+                <p class="text-gray-400">纯净生存 · 友好社区 · 长期稳定</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="mc-border bg-gray-800 p-6 card-hover">
+                    <div class="w-16 h-16 bg-green-600 mc-border mb-4 flex items-center justify-center">
+                        <svg class="w-8 h-8" fill="white" viewBox="0 0 24 24">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                        </svg>
+                    </div>
+                    <h3 class="pixel-font text-sm text-green-400 mb-3">游戏版本</h3>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        Java 版 1.21.x<br>
+                        支持基岩版互通<br>
+                        正版 / 离线均可
+                    </p>
+                </div>
+
+                <div class="mc-border bg-gray-800 p-6 card-hover">
+                    <div class="w-16 h-16 bg-yellow-600 mc-border mb-4 flex items-center justify-center">
+                        <svg class="w-8 h-8" fill="white" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                        </svg>
+                    </div>
+                    <h3 class="pixel-font text-sm text-yellow-400 mb-3">服务器特色</h3>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        纯生存无作弊<br>
+                        经济系统 · 领地保护<br>
+                        丰富插件体验
+                    </p>
+                </div>
+
+                <div class="mc-border bg-gray-800 p-6 card-hover">
+                    <div class="w-16 h-16 bg-blue-600 mc-border mb-4 flex items-center justify-center">
+                        <svg class="w-8 h-8" fill="white" viewBox="0 0 24 24">
+                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+                        </svg>
+                    </div>
+                    <h3 class="pixel-font text-sm text-blue-400 mb-3">社区氛围</h3>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        和谐友善氛围<br>
+                        新人友好带飞<br>
+                        定期社区活动
+                    </p>
+                </div>
+            </div>
+
+            <!-- 插件列表 -->
+            <div class="mt-16 mc-border bg-gray-800 p-8">
+                <h3 class="pixel-font text-sm text-green-400 mb-6 text-center">服务器插件</h3>
+                <div class="flex flex-wrap justify-center gap-3">
+                    <span class="mc-button px-4 py-2 text-xs">移动光源</span>
+                    <span class="mc-button px-4 py-2 text-xs">连锁采集</span>
+                    <span class="mc-button px-4 py-2 text-xs">耐久度展示</span>
+                    <span class="mc-button px-4 py-2 text-xs">领地保护</span>
+                    <span class="mc-button px-4 py-2 text-xs">经济系统</span>
+                    <span class="mc-button px-4 py-2 text-xs">传送系统</span>
+                    <span class="mc-button px-4 py-2 text-xs">登录安全</span>
+                    <span class="mc-button px-4 py-2 text-xs">更多箱子</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 领地位置 -->
+    <section id="territory" class="py-20 dirt-bg">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="pixel-font text-2xl text-green-400 mb-4">机器社区领地</h2>
+                <div class="w-24 h-1 bg-green-500 mx-auto mb-6"></div>
+                <p class="text-gray-300">公会核心工业区 · 红石机器聚集地</p>
+            </div>
+
+            <div class="mc-border bg-gray-800 p-8">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="pixel-font text-sm text-yellow-400 mb-4">📍 领地坐标</h3>
+                        <div class="space-y-3 text-gray-300">
+                            <div class="flex items-center gap-3">
+                                <span class="text-green-400 font-bold">X:</span>
+                                <span class="pixel-font">2568</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-green-400 font-bold">Y:</span>
+                                <span class="pixel-font">64</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-green-400 font-bold">Z:</span>
+                                <span class="pixel-font">-1842</span>
+                            </div>
+                        </div>
+
+                        <h3 class="pixel-font text-sm text-yellow-400 mt-8 mb-4">🏠 主要设施</h3>
+                        <ul class="space-y-2 text-gray-300 text-sm">
+                            <li>• 全自动刷铁机 - 每小时 500+ 铁锭</li>
+                            <li>• 村民交易所 - 全职业满级村民</li>
+                            <li>• 刷怪塔 - 高效经验产出</li>
+                            <li>• 全自动农场 - 小麦 / 胡萝卜 / 马铃薯</li>
+                            <li>• 红石仓库系统 - 智能物品分类</li>
+                            <li>• 公会大厅 - 成员聚会场所</li>
+                        </ul>
+                    </div>
+
+                    <div class="mc-border bg-gray-900 p-4">
+                        <div class="aspect-square bg-green-900 relative overflow-hidden">
+                            <div class="absolute inset-0" style="background: 
+                                linear-gradient(45deg, #2d5a2d 25%, transparent 25%),
+                                linear-gradient(-45deg, #2d5a2d 25%, transparent 25%),
+                                linear-gradient(45deg, transparent 75%, #2d5a2d 75%),
+                                linear-gradient(-45deg, transparent 75%, #2d5a2d 75%);
+                                background-size: 16px 16px;
+                                background-position: 0 0, 0 8px, 8px -8px, -8px 0px;">
+                            </div>
+
+                            <div class="absolute top-1/4 left-1/4 w-8 h-8 bg-gray-500 border-2 border-black" title="刷铁机"></div>
+                            <div class="absolute top-1/3 right-1/3 w-10 h-6 bg-yellow-700 border-2 border-black" title="村民交易所"></div>
+                            <div class="absolute bottom-1/4 left-1/3 w-6 h-10 bg-gray-700 border-2 border-black" title="刷怪塔"></div>
+                            <div class="absolute top-1/2 left-1/2 w-12 h-12 bg-red-700 border-2 border-black transform -translate-x-1/2 -translate-y-1/2" title="公会大厅">
+                                <span class="absolute inset-0 flex items-center justify-center pixel-font text-xs">🏠</span>
+                            </div>
+
+                            <div class="absolute top-1/2 left-0 right-0 h-1 bg-yellow-800 transform -translate-y-1/2"></div>
+                            <div class="absolute left-1/2 top-0 bottom-0 w-1 bg-yellow-800 transform -translate-x-1/2"></div>
+                        </div>
+                        <p class="text-center text-gray-500 text-xs mt-3 pixel-font">领地示意图</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 p-4 bg-gray-900 border-2 border-green-700">
+                    <p class="text-green-400 text-sm">
+                        💡 <strong>传送方式：</strong>游戏内输入 <span class="pixel-font text-yellow-400">/warp machine</span> 即可直达机器社区
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 成员名单 -->
+    <section id="members" class="py-20 bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="pixel-font text-2xl text-green-400 mb-4">公会成员</h2>
+                <div class="w-24 h-1 bg-green-500 mx-auto mb-6"></div>
+                <p class="text-gray-400">点击成员卡片查看详细信息</p>
+            </div>
+
+            <!-- 成员筛选 -->
+            <div class="flex flex-wrap justify-center gap-4 mb-12">
+                <button class="mc-button px-6 py-2 pixel-font text-xs text-white member-filter active" data-filter="all">全部</button>
+                <button class="mc-button px-6 py-2 pixel-font text-xs text-white member-filter" data-filter="miaocui">妙脆苑</button>
+                <button class="mc-button px-6 py-2 pixel-font text-xs text-white member-filter" data-filter="weizhen">味真族</button>
+            </div>
+
+            <!-- 成员卡片网格 -->
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-16" id="memberGrid">
+                <!-- 成员卡片由 JS 生成 -->
+            </div>
+
+            <!-- 成员详情面板 -->
+            <div class="mc-border bg-gray-800 p-8" id="memberDetail">
+                <div class="text-center text-gray-500 py-12">
+                    <p>← 点击左侧成员卡片查看详细信息</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 管理后台：添加成员（默认隐藏，验证通过后显示） -->
+    <section id="adminSection" class="py-20 dirt-bg hidden">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="pixel-font text-2xl text-yellow-400 mb-4">成员管理</h2>
+                <div class="w-24 h-1 bg-yellow-500 mx-auto mb-6"></div>
+                <p class="text-gray-300">添加、编辑公会成员信息</p>
+                <!-- 锁定管理面板按钮 -->
+                <button onclick="lockAdmin()" class="mt-4 mc-button px-4 py-2 pixel-font text-xs text-white bg-red-800" title="隐藏管理面板并清除验证">
+                    🔒 锁定管理面板
+                </button>
+            </div>
+
+            <div class="mc-border bg-gray-800 p-8">
+                <!-- 切换标签 -->
+                <div class="flex gap-2 mb-8">
+                    <button class="tab-btn active" id="tabAdd" onclick="switchTab('add')">添加新成员</button>
+                    <button class="tab-btn" id="tabList" onclick="switchTab('list')">成员列表管理</button>
+                </div>
+
+                <!-- 添加成员表单 -->
+                <div id="panelAdd">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <!-- 左侧：基础信息 -->
+                        <div class="space-y-4">
+                            <h3 class="pixel-font text-sm text-green-400 mb-4">基础信息</h3>
+
+                            <div>
+                                <label class="text-sm text-gray-400 block mb-1">玩家昵称</label>
+                                <input type="text" class="mc-input" id="inputName" placeholder="例如：脆脆鲨">
+                            </div>
+
+                            <div>
+                                <label class="text-sm text-gray-400 block mb-1">游戏 ID</label>
+                                <input type="text" class="mc-input" id="inputId" placeholder="Minecraft 游戏ID">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-sm text-gray-400 block mb-1">公会归属</label>
+                                    <select class="mc-select w-full" id="inputGroup">
+                                        <option value="miaocui">妙脆苑</option>
+                                        <option value="weizhen">味真族</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-sm text-gray-400 block mb-1">职位</label>
+                                    <select class="mc-select w-full" id="inputRole">
+                                        <option value="成员">成员</option>
+                                        <option value="会长">会长</option>
+                                        <option value="副会长">副会长</option>
+                                        <option value="技术组">技术组</option>
+                                        <option value="建筑组">建筑组</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-sm text-gray-400 block mb-1">游戏版本</label>
+                                    <input type="text" class="mc-input" id="inputVersion" placeholder="Java 1.21">
+                                </div>
+                                <div>
+                                    <label class="text-sm text-gray-400 block mb-1">惯用设备</label>
+                                    <input type="text" class="mc-input" id="inputDevice" placeholder="PC">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-sm text-gray-400 block mb-1">在线时段</label>
+                                <input type="text" class="mc-input" id="inputOnline" placeholder="每晚 20:00-24:00">
+                            </div>
+
+                            <div>
+                                <label class="text-sm text-gray-400 block mb-1">熟练程度</label>
+                                <select class="mc-select w-full" id="inputLevel">
+                                    <option value="老玩家">老玩家</option>
+                                    <option value="七八八八">七八八八</option>
+                                    <option value="你带带我">你带带我</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="text-sm text-gray-400 block mb-1">注意事项 / 简介</label>
+                                <textarea class="mc-input h-20 resize-none" id="inputNotice"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="text-sm text-gray-400 block mb-1">游戏偏好</label>
+                                <input type="text" class="mc-input" id="inputPreference" placeholder="生存, 红石, 建筑">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-sm text-gray-400 block mb-1">常用模组</label>
+                                    <input type="text" class="mc-input" id="inputMods" placeholder="Sodium, Iris">
+                                </div>
+                                <div>
+                                    <label class="text-sm text-gray-400 block mb-1">材质包</label>
+                                    <input type="text" class="mc-input" id="inputTexture" placeholder="原版高清">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-sm text-gray-400 block mb-1">头像文字（单字）</label>
+                                <input type="text" class="mc-input w-20" id="inputAvatar" maxlength="1" placeholder="妙">
+                            </div>
+                        </div>
+
+                        <!-- 右侧：技能点设置 -->
+                        <div class="space-y-3">
+                            <h3 class="pixel-font text-sm text-green-400 mb-4">赛博技能点设置</h3>
+
+                            <div id="skillSliders" class="space-y-4">
+                                <!-- 技能滑块由 JS 生成 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 flex justify-center gap-4">
+                        <button class="mc-button px-8 py-3 pixel-font text-xs text-white bg-green-700" onclick="addMember()">
+                            ✅ 添加成员
+                        </button>
+                        <button class="mc-button px-8 py-3 pixel-font text-xs text-white" onclick="resetForm()">
+                            重置表单
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 成员列表管理 -->
+                <div id="panelList" class="hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b-2 border-gray-700">
+                                    <th class="text-left py-3 px-2 pixel-font text-xs text-green-400">昵称</th>
+                                    <th class="text-left py-3 px-2 pixel-font text-xs text-green-400">公会</th>
+                                    <th class="text-left py-3 px-2 pixel-font text-xs text-green-400">职位</th>
+                                    <th class="text-left py-3 px-2 pixel-font text-xs text-green-400">游戏ID</th>
+                                    <th class="text-right py-3 px-2 pixel-font text-xs text-green-400">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminMemberList">
+                                <!-- 由 JS 生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 修改管理员密码 -->
+                    <div class="mt-8 p-6 bg-gray-900 border-2 border-yellow-700">
+                        <h3 class="pixel-font text-xs text-yellow-400 mb-4">🔑 修改管理员密码</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="text-sm text-gray-400 block mb-1">当前密码</label>
+                                <input type="password" class="mc-input" id="currentPwd" placeholder="输入当前密码">
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-400 block mb-1">新密码</label>
+                                <input type="password" class="mc-input" id="newPwd" placeholder="输入新密码">
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-400 block mb-1">确认新密码</label>
+                                <input type="password" class="mc-input" id="confirmPwd" placeholder="再次输入新密码">
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center gap-4">
+                            <button class="mc-button px-6 py-2 pixel-font text-xs text-white bg-yellow-700" onclick="changePassword()">
+                                ✅ 修改密码
+                            </button>
+                            <span id="pwdMsg" class="text-sm hidden"></span>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-gray-900 border-2 border-yellow-700">
+                        <p class="text-yellow-400 text-sm">
+                            ⚠️ <strong>提示：</strong>成员数据保存在浏览器本地存储中，清除浏览器缓存会丢失数据。
+                        </p>
+                    </div>
+
+                    <div class="mt-4 flex justify-center gap-4">
+                        <button class="mc-button px-6 py-2 pixel-font text-xs text-white" onclick="exportData()">
+                            📤 导出数据
+                        </button>
+                        <button class="mc-button px-6 py-2 pixel-font text-xs text-white" onclick="document.getElementById('importFile').click()">
+                            📥 导入数据
+                        </button>
+                        <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="stone-bg border-t-4 border-black py-8 relative">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <div class="flex items-center justify-center gap-4 mb-4">
+                <span class="pixel-font text-green-400 text-sm">妙脆苑</span>
+                <span class="text-gray-500">×</span>
+                <span class="pixel-font text-yellow-400 text-sm">味真族</span>
+            </div>
+            <p class="text-gray-400 text-sm mb-4">© 2024 妙脆苑公会 · Minecraft 生存服务器</p>
+            <p class="text-gray-600 text-xs">Made with ❤️ by 公会管理团队</p>
+        </div>
+
+        <!-- 隐藏小眼睛图标 -->
+        <svg id="hiddenEyeIcon" class="hidden-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
+            <line x1="1" y1="1" x2="23" y2="23" stroke-width="2.5" opacity="0.7" />
+        </svg>
+    </footer>
+
+    <!-- ========== 密码验证弹窗（默认隐藏） ========== -->
+    <div id="passwordModal" class="modal-overlay hidden">
+        <div class="modal-dialog">
+            <div class="text-center mb-5">
+                <div class="w-14 h-14 mx-auto bg-gray-700 mc-border flex items-center justify-center mb-3">
+                    <svg class="w-7 h-7 text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                </div>
+                <h3 class="pixel-font text-sm text-yellow-400 mb-1">管理员验证</h3>
+                <p class="text-gray-500 text-xs">请输入管理员密码以访问后台</p>
+            </div>
+            <div class="space-y-4">
+                <input type="password" id="adminPasswordInput" class="mc-input text-center pixel-font text-sm py-3" placeholder="••••••••" maxlength="32" autocomplete="off">
+                <p id="passwordError" class="text-red-400 text-xs text-center hidden">❌ 密码错误，请重试</p>
+                <div class="flex gap-3 justify-center">
+                    <button id="btnConfirmPassword" class="mc-button px-6 py-2 pixel-font text-xs text-white bg-green-700">
+                        确认
+                    </button>
+                    <button id="btnCancelPassword" class="mc-button px-6 py-2 pixel-font text-xs text-white">
+                        取消
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 管理员密码系统 ====================
+        const DEFAULT_ADMIN_PASSWORD = 'miaocui2024';
+        const STORAGE_KEY_PASSWORD = 'mc_admin_password';
+        const STORAGE_KEY_AUTH = 'mc_admin_authenticated';
+
+        // 获取或初始化管理员密码
+        function getAdminPassword() {
+            const saved = localStorage.getItem(STORAGE_KEY_PASSWORD);
+            if (!saved) {
+                localStorage.setItem(STORAGE_KEY_PASSWORD, DEFAULT_ADMIN_PASSWORD);
+                return DEFAULT_ADMIN_PASSWORD;
+            }
+            return saved;
+        }
+
+        // 检查是否已认证
+        function isAuthenticated() {
+            return sessionStorage.getItem(STORAGE_KEY_AUTH) === 'true';
+        }
+
+        // 设置认证状态
+        function setAuthenticated(value) {
+            if (value) {
+                sessionStorage.setItem(STORAGE_KEY_AUTH, 'true');
+            } else {
+                sessionStorage.removeItem(STORAGE_KEY_AUTH);
+            }
+            updateAdminVisibility();
+        }
+
+        // 更新管理相关元素的可见性
+        function updateAdminVisibility() {
+            const authenticated = isAuthenticated();
+            const adminNavLink = document.getElementById('adminNavLink');
+            const adminSection = document.getElementById('adminSection');
+            const eyeIcon = document.getElementById('hiddenEyeIcon');
+
+            if (authenticated) {
+                // 显示管理入口
+                if (adminNavLink) adminNavLink.classList.remove('hidden');
+                if (adminSection) adminSection.classList.remove('hidden');
+                if (eyeIcon) eyeIcon.classList.add('authenticated');
+                if (eyeIcon) eyeIcon.setAttribute('title', '已认证 · 点击可锁定管理面板');
+            } else {
+                // 隐藏管理入口
+                if (adminNavLink) adminNavLink.classList.add('hidden');
+                if (adminSection) adminSection.classList.add('hidden');
+                if (eyeIcon) eyeIcon.classList.remove('authenticated');
+                if (eyeIcon) eyeIcon.setAttribute('title', '');
+            }
+        }
+
+        // 显示密码弹窗
+        function showPasswordModal() {
+            const modal = document.getElementById('passwordModal');
+            const input = document.getElementById('adminPasswordInput');
+            const errorMsg = document.getElementById('passwordError');
+
+            modal.classList.remove('hidden');
+            input.value = '';
+            input.classList.remove('modal-input-error');
+            errorMsg.classList.add('hidden');
+            setTimeout(() => input.focus(), 150);
+        }
+
+        // 隐藏密码弹窗
+        function hidePasswordModal() {
+            const modal = document.getElementById('passwordModal');
+            modal.classList.add('hidden');
+            document.getElementById('adminPasswordInput').value = '';
+            document.getElementById('adminPasswordInput').classList.remove('modal-input-error');
+            document.getElementById('passwordError').classList.add('hidden');
+        }
+
+        // 验证密码
+        function verifyPassword() {
+            const input = document.getElementById('adminPasswordInput');
+            const errorMsg = document.getElementById('passwordError');
+            const enteredPassword = input.value.trim();
+            const correctPassword = getAdminPassword();
+
+            if (enteredPassword === correctPassword) {
+                // 密码正确
+                setAuthenticated(true);
+                hidePasswordModal();
+                // 滚动到管理面板
+                setTimeout(() => {
+                    const adminSection = document.getElementById('adminSection');
+                    if (adminSection) {
+                        adminSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 300);
+            } else {
+                // 密码错误
+                input.classList.add('modal-input-error');
+                errorMsg.classList.remove('hidden');
+                input.value = '';
+                setTimeout(() => {
+                    input.classList.remove('modal-input-error');
+                    input.focus();
+                }, 500);
+            }
+        }
+
+        // 锁定管理面板
+        function lockAdmin() {
+            if (confirm('确定要锁定管理面板吗？\n锁定后需要重新输入密码才能访问。')) {
+                setAuthenticated(false);
+                // 滚动回顶部
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // 修改密码
+        function changePassword() {
+            const currentPwd = document.getElementById('currentPwd').value.trim();
+            const newPwd = document.getElementById('newPwd').value.trim();
+            const confirmPwd = document.getElementById('confirmPwd').value.trim();
+            const msgEl = document.getElementById('pwdMsg');
+
+            // 重置提示
+            msgEl.classList.add('hidden');
+            msgEl.classList.remove('text-green-400', 'text-red-400');
+
+            // 验证当前密码
+            if (currentPwd !== getAdminPassword()) {
+                msgEl.textContent = '❌ 当前密码错误';
+                msgEl.classList.add('text-red-400');
+                msgEl.classList.remove('hidden');
+                return;
+            }
+
+            // 验证新密码
+            if (!newPwd || newPwd.length < 4) {
+                msgEl.textContent = '❌ 新密码至少需要4个字符';
+                msgEl.classList.add('text-red-400');
+                msgEl.classList.remove('hidden');
+                return;
+            }
+
+            if (newPwd !== confirmPwd) {
+                msgEl.textContent = '❌ 两次输入的新密码不一致';
+                msgEl.classList.add('text-red-400');
+                msgEl.classList.remove('hidden');
+                return;
+            }
+
+            // 更新密码
+            localStorage.setItem(STORAGE_KEY_PASSWORD, newPwd);
+            msgEl.textContent = '✅ 密码修改成功！';
+            msgEl.classList.add('text-green-400');
+            msgEl.classList.remove('hidden');
+
+            // 清空输入框
+            document.getElementById('currentPwd').value = '';
+            document.getElementById('newPwd').value = '';
+            document.getElementById('confirmPwd').value = '';
+
+            // 3秒后隐藏提示
+            setTimeout(() => {
+                msgEl.classList.add('hidden');
+            }, 3000);
+        }
+
+        // 小眼睛点击事件
+        function handleEyeClick() {
+            if (isAuthenticated()) {
+                // 已认证：询问是否锁定
+                lockAdmin();
+            } else {
+                // 未认证：弹出密码框
+                showPasswordModal();
+            }
+        }
+
+        // ==================== 技能标签配置 ====================
+        const skillLabels = {
+            pve: { name: "PVE", left: "很弱", right: "凶悍" },
+            pvp: { name: "PVP", left: "很弱", right: "凶悍" },
+            explore: { name: "探索", left: "足不出户", right: "探险家" },
+            parkour: { name: "跑酷", left: "想开飞行", right: "飞檐走壁" },
+            fishing: { name: "钓鱼", left: "我不理解", right: "钓鱼佬" },
+            mining: { name: "挖矿", left: "不沾矿鼻", right: "矿产大亨" },
+            farming: { name: "种植", left: "不种地", right: "种植园主" },
+            skin: { name: "皮肤制作", left: "一窍不通", right: "制作师" },
+            breeding: { name: "养殖", left: "不养生物", right: "养殖基地" },
+            redstone: { name: "红石", left: "看不懂思密达", right: "我给你整个活" },
+            building: { name: "建筑", left: "相当拉胯", right: "建筑天才" },
+            infrastructure: { name: "基建", left: "凑合用吧", right: "盘大盘强" }
+        };
+
+        // ==================== 默认成员数据 ====================
+        const defaultMembers = [{
+            id: 1,
+            name: "脆脆鲨",
+            group: "miaocui",
+            role: "会长",
+            avatar: "脆",
+            avatarColor: "bg-green-500",
+            info: {
+                id: "cuicui_shark",
+                version: "Java 1.21",
+                device: "PC",
+                online: "每晚 20:00-24:00 / 节假日全天",
+                level: "老玩家",
+                notice: "擅长红石工程，欢迎交流机器设计",
+                preference: "生存, 红石, 建筑",
+                commands: "常用指令权限, 传送管理",
+                mods: "Sodium, Iris, 迷你HUD",
+                texture: "原版高清修复"
+            },
+            skills: {
+                pve: 85,
+                pvp: 40,
+                explore: 70,
+                parkour: 30,
+                fishing: 50,
+                mining: 90,
+                farming: 60,
+                skin: 20,
+                breeding: 55,
+                redstone: 95,
+                building: 75,
+                infrastructure: 88
+            }
+        }, {
+            id: 2,
+            name: "味噌汤",
+            group: "weizhen",
+            role: "副会长",
+            avatar: "味",
+            avatarColor: "bg-yellow-500",
+            info: {
+                id: "weizhen_tang",
+                version: "Java + 基岩",
+                device: "PC + 移动端",
+                online: "全天不定时",
+                level: "老玩家",
+                notice: "味真族原会长，擅长建筑装饰",
+                preference: "建筑, 生存, PVE",
+                commands: "领地管理权限",
+                mods: "光影必备",
+                texture: "写实材质包"
+            },
+            skills: {
+                pve: 75,
+                pvp: 35,
+                explore: 85,
+                parkour: 25,
+                fishing: 70,
+                mining: 50,
+                farming: 80,
+                skin: 60,
+                breeding: 75,
+                redstone: 30,
+                building: 92,
+                infrastructure: 80
+            }
+        }, {
+            id: 3,
+            name: "土豆君",
+            group: "miaocui",
+            role: "成员",
+            avatar: "土",
+            avatarColor: "bg-yellow-700",
+            info: {
+                id: "potato_king",
+                version: "Java 1.21",
+                device: "PC",
+                online: "周末全天",
+                level: "七八八八",
+                notice: "重度矿工，矿脉活地图",
+                preference: "挖矿, 生存, PVE",
+                commands: "基础传送权限",
+                mods: "Xray资源包(合规)",
+                texture: "原版"
+            },
+            skills: {
+                pve: 60,
+                pvp: 20,
+                explore: 90,
+                parkour: 15,
+                fishing: 40,
+                mining: 98,
+                farming: 45,
+                skin: 10,
+                breeding: 35,
+                redstone: 25,
+                building: 40,
+                infrastructure: 30
+            }
+        }, {
+            id: 4,
+            name: "三文鱼",
+            group: "weizhen",
+            role: "成员",
+            avatar: "三",
+            avatarColor: "bg-blue-500",
+            info: {
+                id: "salmon_fish",
+                version: "基岩版",
+                device: "移动端",
+                online: "节假日",
+                level: "你带带我",
+                notice: "新人玩家，求带求保护",
+                preference: "生存, 解谜, 跑酷",
+                commands: "无",
+                mods: "无",
+                texture: "原版"
+            },
+            skills: {
+                pve: 25,
+                pvp: 10,
+                explore: 40,
+                parkour: 55,
+                fishing: 80,
+                mining: 30,
+                farming: 35,
+                skin: 15,
+                breeding: 40,
+                redstone: 5,
+                building: 20,
+                infrastructure: 10
+            }
+        }, {
+            id: 5,
+            name: "红石佬",
+            group: "miaocui",
+            role: "技术组",
+            avatar: "红",
+            avatarColor: "bg-red-600",
+            info: {
+                id: "redstone_pro",
+                version: "Java 1.21",
+                device: "PC",
+                online: "每晚",
+                level: "老玩家",
+                notice: "红石狂魔，没有做不出来的机器",
+                preference: "红石, 生存, PVE",
+                commands: "创世神权限",
+                mods: "投影模组, 小地图",
+                texture: "原版高清"
+            },
+            skills: {
+                pve: 55,
+                pvp: 25,
+                explore: 45,
+                parkour: 20,
+                fishing: 15,
+                mining: 60,
+                farming: 40,
+                skin: 30,
+                breeding: 35,
+                redstone: 100,
+                building: 65,
+                infrastructure: 90
+            }
+        }, {
+            id: 6,
+            name: "建筑师",
+            group: "weizhen",
+            role: "建筑组",
+            avatar: "建",
+            avatarColor: "bg-purple-500",
+            info: {
+                id: "archi_master",
+                version: "Java 1.21",
+                device: "PC",
+                online: "下午 + 晚上",
+                level: "老玩家",
+                notice: "中世纪建筑专精",
+                preference: "建筑, 生存",
+                commands: "创世神权限",
+                mods: "Replay Mod",
+                texture: "写实中世纪"
+            },
+            skills: {
+                pve: 40,
+                pvp: 15,
+                explore: 60,
+                parkour: 30,
+                fishing: 25,
+                mining: 35,
+                farming: 50,
+                skin: 45,
+                breeding: 40,
+                redstone: 20,
+                building: 98,
+                infrastructure: 85
+            }
+        },{
+            id: 7,
+            name: "味噌汤",
+            group: "weizhen",
+            role: "副会长",
+            avatar: "味",
+            avatarColor: "bg-yellow-500",
+            info: {
+                id: "weizhen_tang",
+                version: "Java + 基岩",
+                device: "PC + 移动端",
+                online: "全天不定时",
+                level: "老玩家",
+                notice: "味真族原会长，擅长建筑装饰",
+                preference: "建筑, 生存, PVE",
+                commands: "领地管理权限",
+                mods: "光影必备",
+                texture: "写实材质包"
+            },
+            skills: {
+                pve: 75,
+                pvp: 35,
+                explore: 85,
+                parkour: 25,
+                fishing: 70,
+                mining: 50,
+                farming: 80,
+                skin: 60,
+                breeding: 75,
+                redstone: 30,
+                building: 92,
+                infrastructure: 80
+            }
+        }
+		];
+
+        // ==================== 成员数据管理 ====================
+        let members = loadMembers();
+        let currentFilter = 'all';
+        let nextId = members.length > 0 ? Math.max(...members.map(m => m.id)) + 1 : 1;
+
+        function loadMembers() {
+            const saved = localStorage.getItem('mc_guild_members');
+            if (saved) {
+                try {
+                    return JSON.parse(saved);
+                } catch (e) {
+                    return [...defaultMembers];
+                }
+            }
+            return [...defaultMembers];
+        }
+
+        function saveMembers() {
+            localStorage.setItem('mc_guild_members', JSON.stringify(members));
+        }
+
+        // ==================== 技能滑块 ====================
+        function renderSkillSliders() {
+            const container = document.getElementById('skillSliders');
+            container.innerHTML = Object.keys(skillLabels).map(key => `
+                <div class="flex items-center gap-3">
+                    <span class="text-xs text-gray-400 w-20 shrink-0">${skillLabels[key].name}</span>
+                    <input type="range" min="0" max="100" value="50" 
+                           class="flex-1" id="skill_${key}" oninput="updateSliderValue('${key}')">
+                    <span class="text-green-400 text-sm w-12 text-right" id="val_${key}">50%</span>
+                </div>
+            `).join('');
+        }
+
+        function updateSliderValue(key) {
+            const val = document.getElementById('skill_' + key).value;
+            document.getElementById('val_' + key).textContent = val + '%';
+        }
+
+        // ==================== 成员卡片渲染 ====================
+        function renderMemberGrid(filter = 'all') {
+            const grid = document.getElementById('memberGrid');
+            const filtered = filter === 'all' ? members : members.filter(m => m.group === filter);
+
+            if (filtered.length === 0) {
+                grid.innerHTML =
+                    '<div class="col-span-full text-center text-gray-500 py-8">暂无成员数据</div>';
+                return;
+            }
+
+            grid.innerHTML = filtered.map(member => `
+                <div class="member-card mc-border bg-gray-800 p-4 cursor-pointer card-hover text-center" 
+                     data-id="${member.id}" onclick="showMemberDetail(${member.id})">
+                    <div class="w-16 h-16 mx-auto ${member.avatarColor || 'bg-gray-500'} mc-border flex items-center justify-center mb-3">
+                        <span class="pixel-font text-xl">${member.avatar || member.name.charAt(0)}</span>
+                    </div>
+                    <h4 class="pixel-font text-xs text-white mb-1">${member.name}</h4>
+                    <p class="text-xs ${member.group === 'miaocui' ? 'text-green-400' : 'text-yellow-400'}">${member.role}</p>
+                </div>
+            `).join('');
+        }
+
+        // ==================== 成员详情 ====================
+        function showMemberDetail(id) {
+            const member = members.find(m => m.id === id);
+            if (!member) return;
+
+            const detail = document.getElementById('memberDetail');
+            const skillKeys = Object.keys(member.skills);
+            const leftSkills = skillKeys.slice(0, 6);
+            const rightSkills = skillKeys.slice(6, 12);
+
+            detail.innerHTML = `
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div>
+                        <div class="text-center mb-6">
+                            <div class="w-24 h-24 mx-auto ${member.avatarColor || 'bg-gray-500'} mc-border flex items-center justify-center mb-4">
+                                <span class="pixel-font text-3xl">${member.avatar || member.name.charAt(0)}</span>
+                            </div>
+                            <h3 class="pixel-font text-lg text-green-400 mb-1">${member.name}</h3>
+                            <p class="text-sm ${member.group === 'miaocui' ? 'text-green-400' : 'text-yellow-400'}">
+                                ${member.group === 'miaocui' ? '妙脆苑' : '味真族'} · ${member.role}
+                            </p>
+                        </div>
+                        
+                        <div class="space-y-3 text-sm">
+                            <div class="flex">
+                                <span class="text-gray-500 w-20">ID：</span>
+                                <span class="text-gray-300">${member.info.id}</span>
+                            </div>
+                            <div class="flex">
+                                <span class="text-gray-500 w-20">版本：</span>
+                                <span class="text-gray-300">${member.info.version}</span>
+                            </div>
+                            <div class="flex">
+                                <span class="text-gray-500 w-20">设备：</span>
+                                <span class="text-gray-300">${member.info.device}</span>
+                            </div>
+                            <div class="flex">
+                                <span class="text-gray-500 w-20">时段：</span>
+                                <span class="text-gray-300">${member.info.online}</span>
+                            </div>
+                            <div class="flex">
+                                <span class="text-gray-500 w-20">熟练度：</span>
+                                <span class="text-gray-300">${member.info.level}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h4 class="pixel-font text-xs text-yellow-400 mb-2">注意事项</h4>
+                            <p class="text-sm text-gray-300 bg-gray-900 p-3 border-2 border-gray-700">
+                                ${member.info.notice || '暂无'}
+                            </p>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h4 class="pixel-font text-xs text-yellow-400 mb-2">游戏偏好</h4>
+                            <p class="text-sm text-gray-300">${member.info.preference || '暂无'}</p>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h4 class="pixel-font text-xs text-yellow-400 mb-2">模组 / 材质</h4>
+                            <p class="text-sm text-gray-300">模组：${member.info.mods || '无'}</p>
+                            <p class="text-sm text-gray-300">材质：${member.info.texture || '原版'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <h3 class="pixel-font text-sm text-green-400 mb-6 text-center">赛博技能点</h3>
+                        <div class="grid md:grid-cols-2 gap-x-8 gap-y-4">
+                            ${leftSkills.map(key => renderSkillBar(key, member.skills[key])).join('')}
+                            ${rightSkills.map(key => renderSkillBar(key, member.skills[key])).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            setTimeout(() => {
+                document.querySelectorAll('.skill-fill').forEach((bar, index) => {
+                    setTimeout(() => {
+                        bar.classList.add('animated');
+                    }, index * 80);
+                });
+            }, 100);
+        }
+
+        function renderSkillBar(key, value) {
+            const label = skillLabels[key];
+            return `
+                <div class="skill-item">
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="pixel-font text-gray-400">${label.name}</span>
+                        <span class="text-green-400">${value}%</span>
+                    </div>
+                    <div class="skill-bar">
+                        <div class="skill-fill" style="--skill-level: ${value}%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-600 mt-1">
+                        <span>${label.left}</span>
+                        <span>${label.right}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ==================== 管理列表 ====================
+        function renderAdminList() {
+            const tbody = document.getElementById('adminMemberList');
+            tbody.innerHTML = members.map(m => `
+                <tr class="border-b border-gray-700">
+                    <td class="py-3 px-2">${m.name}</td>
+                    <td class="py-3 px-2 ${m.group === 'miaocui' ? 'text-green-400' : 'text-yellow-400'}">
+                        ${m.group === 'miaocui' ? '妙脆苑' : '味真族'}
+                    </td>
+                    <td class="py-3 px-2">${m.role}</td>
+                    <td class="py-3 px-2 text-gray-400">${m.info.id}</td>
+                    <td class="py-3 px-2 text-right">
+                        <button class="text-red-400 hover:text-red-300 text-xs" onclick="deleteMember(${m.id})">删除</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ==================== 添加成员 ====================
+        function addMember() {
+            const name = document.getElementById('inputName').value.trim();
+            if (!name) {
+                alert('请输入玩家昵称');
+                return;
+            }
+
+            const skills = {};
+            Object.keys(skillLabels).forEach(key => {
+                skills[key] = parseInt(document.getElementById('skill_' + key).value) || 50;
+            });
+
+            const colorMap = {
+                'miaocui': 'bg-green-500',
+                'weizhen': 'bg-yellow-500'
+            };
+
+            const newMember = {
+                id: nextId++,
+                name: name,
+                group: document.getElementById('inputGroup').value,
+                role: document.getElementById('inputRole').value,
+                avatar: document.getElementById('inputAvatar').value.trim() || name.charAt(0),
+                avatarColor: colorMap[document.getElementById('inputGroup').value] || 'bg-gray-500',
+                info: {
+                    id: document.getElementById('inputId').value.trim() || '未设置',
+                    version: document.getElementById('inputVersion').value.trim() || 'Java 1.21',
+                    device: document.getElementById('inputDevice').value.trim() || 'PC',
+                    online: document.getElementById('inputOnline').value.trim() || '不定时',
+                    level: document.getElementById('inputLevel').value,
+                    notice: document.getElementById('inputNotice').value.trim(),
+                    preference: document.getElementById('inputPreference').value.trim(),
+                    mods: document.getElementById('inputMods').value.trim(),
+                    texture: document.getElementById('inputTexture').value.trim()
+                },
+                skills: skills
+            };
+
+            members.push(newMember);
+            saveMembers();
+            renderMemberGrid(currentFilter);
+            renderAdminList();
+            resetForm();
+
+            alert('成员添加成功！');
+        }
+
+        // ==================== 删除成员 ====================
+        function deleteMember(id) {
+            if (!confirm('确定要删除该成员吗？')) return;
+            members = members.filter(m => m.id !== id);
+            saveMembers();
+            renderMemberGrid(currentFilter);
+            renderAdminList();
+        }
+
+        // ==================== 重置表单 ====================
+        function resetForm() {
+            document.getElementById('inputName').value = '';
+            document.getElementById('inputId').value = '';
+            document.getElementById('inputGroup').value = 'miaocui';
+            document.getElementById('inputRole').value = '成员';
+            document.getElementById('inputVersion').value = '';
+            document.getElementById('inputDevice').value = '';
+            document.getElementById('inputOnline').value = '';
+            document.getElementById('inputLevel').value = '老玩家';
+            document.getElementById('inputNotice').value = '';
+            document.getElementById('inputPreference').value = '';
+            document.getElementById('inputMods').value = '';
+            document.getElementById('inputTexture').value = '';
+            document.getElementById('inputAvatar').value = '';
+
+            Object.keys(skillLabels).forEach(key => {
+                document.getElementById('skill_' + key).value = 50;
+                document.getElementById('val_' + key).textContent = '50%';
+            });
+        }
+
+        // ==================== 切换标签 ====================
+        function switchTab(tab) {
+            document.getElementById('tabAdd').classList.toggle('active', tab === 'add');
+            document.getElementById('tabList').classList.toggle('active', tab === 'list');
+            document.getElementById('panelAdd').classList.toggle('hidden', tab !== 'add');
+            document.getElementById('panelList').classList.toggle('hidden', tab !== 'list');
+
+            if (tab === 'list') {
+                renderAdminList();
+            }
+        }
+
+        // ==================== 导出导入 ====================
+        function exportData() {
+            const dataStr = JSON.stringify(members, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '妙脆苑成员数据.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (Array.isArray(data)) {
+                        members = data;
+                        nextId = Math.max(...members.map(m => m.id)) + 1;
+                        saveMembers();
+                        renderMemberGrid(currentFilter);
+                        renderAdminList();
+                        alert('导入成功！');
+                    } else {
+                        alert('数据格式不正确');
+                    }
+                } catch (err) {
+                    alert('文件解析失败');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // ==================== 事件绑定 ====================
+        // 筛选按钮
+        document.querySelectorAll('.member-filter').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.member-filter').forEach(b => b.classList.remove(
+                    'active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.filter;
+                renderMemberGrid(currentFilter);
+            });
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // 小眼睛点击事件
+        document.getElementById('hiddenEyeIcon').addEventListener('click', handleEyeClick);
+
+        // 密码弹窗确认按钮
+        document.getElementById('btnConfirmPassword').addEventListener('click', verifyPassword);
+
+        // 密码弹窗取消按钮
+        document.getElementById('btnCancelPassword').addEventListener('click', hidePasswordModal);
+
+        // 密码输入框回车事件
+        document.getElementById('adminPasswordInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                verifyPassword();
+            } else if (e.key === 'Escape') {
+                hidePasswordModal();
+            }
+        });
+
+        // 点击弹窗遮罩关闭
+        document.getElementById('passwordModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hidePasswordModal();
+            }
+        });
+
+        // ==================== 初始化 ====================
+        function init() {
+            renderSkillSliders();
+            renderMemberGrid();
+            if (members.length > 0) {
+                showMemberDetail(members[0].id);
+            }
+            // 检查认证状态并更新UI
+            updateAdminVisibility();
+            // 确保密码已初始化
+            getAdminPassword();
+        }
+
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('shadow-2xl');
+            } else {
+                nav.classList.remove('shadow-2xl');
+            }
+        });
+
+        // 启动
+        init();
+    </script>
+</body>
+</html>

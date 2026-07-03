@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>妙脆苑 · 成员数据编辑器</title>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        .pixel-font {
+            font-family: 'Press Start 2P', monospace;
+        }
+
+        .mc-border {
+            border: 4px solid #000;
+            box-shadow:
+                inset -4px -4px 0px 0px #555,
+                inset 4px 4px 0px 0px #fff;
+        }
+
+        .mc-button {
+            background: #727272;
+            border: 4px solid #000;
+            box-shadow:
+                inset -4px -4px 0px 0px #3a3a3a,
+                inset 4px 4px 0px 0px #bababa;
+            transition: all 0.1s;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+        }
+
+        .mc-button:hover {
+            background: #919191;
+        }
+
+        .mc-button:active {
+            box-shadow:
+                inset 4px 4px 0px 0px #3a3a3a,
+                inset -4px -4px 0px 0px #bababa;
+        }
+
+        .mc-input,
+        .mc-select {
+            background: #222;
+            border: 3px solid #000;
+            box-shadow: inset 2px 2px 0px #111;
+            color: #fff;
+            padding: 8px 12px;
+            font-family: inherit;
+            outline: none;
+            width: 100%;
+        }
+
+        .mc-input:focus,
+        .mc-select:focus {
+            border-color: #5dff5d;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #222;
+            border: 2px solid #000;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #5dff5d;
+            border: 3px solid #000;
+            cursor: pointer;
+        }
+
+        .skill-bar-bg {
+            background: #333;
+            border: 2px solid #000;
+            height: 16px;
+            overflow: hidden;
+        }
+
+        .skill-fill-demo {
+            height: 100%;
+            background: linear-gradient(to bottom, #5dff5d, #2db82d);
+            width: 0%;
+            transition: width 0.2s;
+        }
+
+        .color-option {
+            width: 28px;
+            height: 28px;
+            border: 2px solid #000;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .color-option.selected {
+            border-color: #fff;
+            transform: scale(1.2);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+        }
+
+        .member-card-preview {
+            transition: all 0.2s;
+        }
+
+        .member-card-preview:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- 头部 -->
+        <div class="text-center mb-10">
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <div class="w-12 h-12 bg-green-500 mc-border flex items-center justify-center">
+                    <span class="pixel-font text-lg">妙</span>
+                </div>
+                <h1 class="pixel-font text-xl text-green-400">成员数据编辑器</h1>
+            </div>
+            <p class="text-gray-400 text-sm">生成符合妙脆苑公会格式的 JSON 数据</p>
+            <div class="flex justify-center gap-4 mt-6">
+                <button id="btnExportJson" class="mc-button px-6 py-3 text-white text-xs bg-green-700">
+                    📤 导出 JSON
+                </button>
+                <button id="btnImportJson" class="mc-button px-6 py-3 text-white text-xs">
+                    📥 导入 JSON 编辑
+                </button>
+                <input type="file" id="importFileInput" accept=".json" class="hidden">
+            </div>
+        </div>
+
+        <!-- 成员列表容器 -->
+        <div id="membersContainer" class="space-y-8 mb-10">
+            <!-- 动态生成成员编辑卡片 -->
+        </div>
+
+        <!-- 添加成员按钮 -->
+        <div class="text-center">
+            <button id="btnAddMember" class="mc-button px-8 py-3 text-white text-sm bg-blue-700">
+                ➕ 添加新成员
+            </button>
+        </div>
+
+        <!-- 底部提示 -->
+        <div class="mt-12 p-6 bg-gray-800 mc-border text-center text-sm text-gray-400">
+            <p class="mb-2">💡 提示：导出的 JSON 文件可直接用于「妙脆苑公会官网」的管理后台导入。</p>
+            <p>所有数据均存储在浏览器本地，关闭页面后若未导出将会丢失，请及时导出备份。</p>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 技能标签 ====================
+        const skillLabels = {
+            pve: { name: "PVE", left: "很弱", right: "凶悍" },
+            pvp: { name: "PVP", left: "很弱", right: "凶悍" },
+            explore: { name: "探索", left: "足不出户", right: "探险家" },
+            parkour: { name: "跑酷", left: "想开飞行", right: "飞檐走壁" },
+            fishing: { name: "钓鱼", left: "我不理解", right: "钓鱼佬" },
+            mining: { name: "挖矿", left: "不沾矿鼻", right: "矿产大亨" },
+            farming: { name: "种植", left: "不种地", right: "种植园主" },
+            skin: { name: "皮肤制作", left: "一窍不通", right: "制作师" },
+            breeding: { name: "养殖", left: "不养生物", right: "养殖基地" },
+            redstone: { name: "红石", left: "看不懂思密达", right: "我给你整个活" },
+            building: { name: "建筑", left: "相当拉胯", right: "建筑天才" },
+            infrastructure: { name: "基建", left: "凑合用吧", right: "盘大盘强" }
+        };
+
+        const skillKeys = Object.keys(skillLabels);
+
+        // 可选头像颜色
+        const avatarColors = [
+            'bg-green-500', 'bg-yellow-500', 'bg-red-600', 'bg-blue-500',
+            'bg-purple-500', 'bg-pink-500', 'bg-orange-500', 'bg-teal-500',
+            'bg-gray-500', 'bg-indigo-500'
+        ];
+
+        // 当前成员数据数组
+        let membersData = [];
+        let nextId = 1;
+
+        // ==================== 数据模型 ====================
+        function createEmptyMember() {
+            const skills = {};
+            skillKeys.forEach(key => skills[key] = 50);
+            return {
+                id: nextId++,
+                name: '',
+                group: 'miaocui',
+                role: '成员',
+                avatar: '',
+                avatarColor: 'bg-green-500',
+                info: {
+                    id: '',
+                    version: 'Java 1.21',
+                    device: 'PC',
+                    online: '',
+                    level: '老玩家',
+                    notice: '',
+                    preference: '',
+                    commands: '',
+                    mods: '',
+                    texture: ''
+                },
+                skills: skills
+            };
+        }
+
+        // 初始化一些演示数据
+        function initDemoData() {
+            const demo = [
+                { ...createEmptyMember(), name: '脆脆鲨', group: 'miaocui', role: '会长', avatar: '脆',
+                    avatarColor: 'bg-green-500', info: { ...createEmptyMember().info, id: 'cuicui_shark',
+                        online: '每晚 20:00-24:00', notice: '擅长红石工程', preference: '生存,红石,建筑', mods: 'Sodium, Iris',
+                        texture: '原版高清' }, skills: { ...createEmptyMember().skills, pve: 85, mining: 90,
+                        redstone: 95, building: 75, infrastructure: 88 } },
+                { ...createEmptyMember(), name: '味噌汤', group: 'weizhen', role: '副会长', avatar: '味',
+                    avatarColor: 'bg-yellow-500', info: { ...createEmptyMember().info, id: 'weizhen_tang',
+                        online: '全天不定时', notice: '味真族原会长', preference: '建筑,生存', mods: '光影必备',
+                    texture: '写实材质包' }, skills: { ...createEmptyMember().skills, explore: 85, building: 92,
+                        infrastructure: 80 } },
+						{ ...createEmptyMember(), name: '脆脆鲨', group: 'miaocui', role: '会长', avatar: '脆',
+						    avatarColor: 'bg-green-500', info: { ...createEmptyMember().info, id: 'cuicui_shark',
+						        online: '每晚 20:00-24:00', notice: '擅长红石工程', preference: '生存,红石,建筑', mods: 'Sodium, Iris',
+						        texture: '原版高清' }, skills: { ...createEmptyMember().skills, pve: 85, mining: 90,
+						        redstone: 95, building: 75, infrastructure: 88 } },
+            ];
+            demo.forEach(m => { m.id = nextId++;
+                membersData.push(m); });
+        }
+
+        // ==================== 渲染成员列表 ====================
+        function renderAllMembers() {
+            const container = document.getElementById('membersContainer');
+            if (membersData.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-gray-500">
+                        <p class="pixel-font text-sm">暂无成员数据</p>
+                        <p class="text-xs mt-2">点击下方按钮添加成员，或导入 JSON 文件</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = membersData.map((member, index) => renderMemberCard(member, index)).join('');
+            // 绑定事件
+            membersData.forEach((_, index) => {
+                bindMemberEvents(index);
+            });
+        }
+
+        function renderMemberCard(member, index) {
+            const skillsHtml = skillKeys.map(key => {
+                const val = member.skills[key] || 50;
+                return `
+                <div class="mb-2">
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-gray-400">${skillLabels[key].name}</span>
+                        <span class="text-green-400" id="skillVal_${index}_${key}">${val}%</span>
+                    </div>
+                    <div class="skill-bar-bg">
+                        <div class="skill-fill-demo" id="skillFill_${index}_${key}" style="width:${val}%"></div>
+                    </div>
+                    <input type="range" min="0" max="100" value="${val}" 
+                           class="w-full mt-1" id="skillInput_${index}_${key}"
+                           data-index="${index}" data-key="${key}">
+                </div>`;
+            }).join('');
+
+            const colorOptions = avatarColors.map(color => {
+                const selected = member.avatarColor === color ? 'selected' : '';
+                return `<div class="color-option ${color} ${selected}" 
+                            data-index="${index}" data-color="${color}" 
+                            onclick="selectAvatarColor(${index}, '${color}')"></div>`;
+            }).join('');
+
+            return `
+            <div class="mc-border bg-gray-800 p-6 member-card-preview" data-index="${index}">
+                <div class="flex justify-between items-start mb-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 ${member.avatarColor} mc-border flex items-center justify-center text-xl pixel-font">
+                            ${member.avatar || '?'}
+                        </div>
+                        <div>
+                            <input type="text" class="mc-input pixel-font text-sm w-40" 
+                                   placeholder="昵称" value="${member.name}" id="name_${index}">
+                            <p class="text-xs mt-1 text-gray-400">ID: ${member.info.id || '未设置'}</p>
+                        </div>
+                    </div>
+                    <button class="text-red-400 hover:text-red-300 text-xs pixel-font" onclick="deleteMember(${index})">
+                        🗑️ 删除
+                    </button>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- 左侧基础信息 -->
+                    <div class="space-y-3">
+                        <h3 class="pixel-font text-xs text-green-400 mb-2">基础信息</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-xs text-gray-400">公会</label>
+                                <select class="mc-select text-xs" id="group_${index}">
+                                    <option value="miaocui" ${member.group==='miaocui'?'selected':''}>妙脆苑</option>
+                                    <option value="weizhen" ${member.group==='weizhen'?'selected':''}>味真族</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">职位</label>
+                                <input type="text" class="mc-input text-xs" value="${member.role}" id="role_${index}">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">游戏ID</label>
+                                <input type="text" class="mc-input text-xs" value="${member.info.id}" id="infoId_${index}">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">版本</label>
+                                <input type="text" class="mc-input text-xs" value="${member.info.version}" id="version_${index}">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">设备</label>
+                                <input type="text" class="mc-input text-xs" value="${member.info.device}" id="device_${index}">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">在线时段</label>
+                                <input type="text" class="mc-input text-xs" value="${member.info.online}" id="online_${index}">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">熟练程度</label>
+                                <select class="mc-select text-xs" id="level_${index}">
+                                    <option value="老玩家" ${member.info.level==='老玩家'?'selected':''}>老玩家</option>
+                                    <option value="七八八八" ${member.info.level==='七八八八'?'selected':''}>七八八八</option>
+                                    <option value="你带带我" ${member.info.level==='你带带我'?'selected':''}>你带带我</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">常用模组</label>
+                                <input type="text" class="mc-input text-xs" value="${member.info.mods}" id="mods_${index}">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">材质包</label>
+                                <input type="text" class="mc-input text-xs" value="${member.info.texture}" id="texture_${index}">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-400">游戏偏好</label>
+                            <input type="text" class="mc-input text-xs" value="${member.info.preference}" id="preference_${index}">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-400">注意事项</label>
+                            <textarea class="mc-input text-xs h-16 resize-none" id="notice_${index}">${member.info.notice}</textarea>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-400">头像文字（单字）</label>
+                            <input type="text" class="mc-input w-16 text-xs" maxlength="1" value="${member.avatar}" id="avatar_${index}">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-400 mb-1">头像背景色</label>
+                            <div class="flex gap-1 flex-wrap">${colorOptions}</div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧技能点 -->
+                    <div>
+                        <h3 class="pixel-font text-xs text-green-400 mb-3">赛博技能点</h3>
+                        <div class="space-y-1">${skillsHtml}</div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function bindMemberEvents(index) {
+            // 基础文本输入自动保存
+            const fields = ['name', 'role', 'infoId', 'version', 'device', 'online', 'mods', 'texture', 'preference',
+                'notice', 'avatar'
+            ];
+            fields.forEach(field => {
+                const el = document.getElementById(`${field}_${index}`);
+                if (el) {
+                    el.addEventListener('input', () => updateMemberFromForm(index));
+                }
+            });
+            // 下拉框
+            ['group', 'level'].forEach(field => {
+                const el = document.getElementById(`${field}_${index}`);
+                if (el) {
+                    el.addEventListener('change', () => updateMemberFromForm(index));
+                }
+            });
+            // 技能滑块
+            skillKeys.forEach(key => {
+                const slider = document.getElementById(`skillInput_${index}_${key}`);
+                if (slider) {
+                    slider.addEventListener('input', function() {
+                        const val = parseInt(this.value);
+                        document.getElementById(`skillVal_${index}_${key}`).textContent = val + '%';
+                        document.getElementById(`skillFill_${index}_${key}`).style.width = val +
+                            '%';
+                        updateMemberFromForm(index);
+                    });
+                }
+            });
+        }
+
+        function updateMemberFromForm(index) {
+            const member = membersData[index];
+            if (!member) return;
+
+            member.name = document.getElementById(`name_${index}`)?.value || '';
+            member.group = document.getElementById(`group_${index}`)?.value || 'miaocui';
+            member.role = document.getElementById(`role_${index}`)?.value || '成员';
+            member.avatar = document.getElementById(`avatar_${index}`)?.value || member.name.charAt(0) || '?';
+            member.info.id = document.getElementById(`infoId_${index}`)?.value || '';
+            member.info.version = document.getElementById(`version_${index}`)?.value || '';
+            member.info.device = document.getElementById(`device_${index}`)?.value || '';
+            member.info.online = document.getElementById(`online_${index}`)?.value || '';
+            member.info.level = document.getElementById(`level_${index}`)?.value || '老玩家';
+            member.info.notice = document.getElementById(`notice_${index}`)?.value || '';
+            member.info.preference = document.getElementById(`preference_${index}`)?.value || '';
+            member.info.mods = document.getElementById(`mods_${index}`)?.value || '';
+            member.info.texture = document.getElementById(`texture_${index}`)?.value || '';
+
+            skillKeys.forEach(key => {
+                const slider = document.getElementById(`skillInput_${index}_${key}`);
+                if (slider) member.skills[key] = parseInt(slider.value) || 50;
+            });
+        }
+
+        function selectAvatarColor(index, color) {
+            membersData[index].avatarColor = color;
+            // 更新 UI
+            const container = document.querySelector(`[data-index="${index}"]`);
+            if (container) {
+                const avatarDiv = container.querySelector('.w-16.h-16');
+                if (avatarDiv) {
+                    avatarDiv.className = `w-16 h-16 ${color} mc-border flex items-center justify-center text-xl pixel-font`;
+                }
+                // 更新颜色选项选中状态
+                container.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+                const selectedOpt = container.querySelector(`.color-option.${color}`);
+                if (selectedOpt) selectedOpt.classList.add('selected');
+            }
+        }
+
+        function deleteMember(index) {
+            if (confirm('确定删除该成员吗？')) {
+                membersData.splice(index, 1);
+                renderAllMembers();
+            }
+        }
+
+        // ==================== 添加成员 ====================
+        function addNewMember() {
+            membersData.push(createEmptyMember());
+            renderAllMembers();
+            // 滚动到新成员
+            setTimeout(() => {
+                const lastCard = document.querySelector('#membersContainer > div:last-child');
+                if (lastCard) lastCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+
+        // ==================== 导出 JSON ====================
+        function exportJson() {
+            if (membersData.length === 0) {
+                alert('请至少添加一位成员后再导出。');
+                return;
+            }
+            // 确保数据最新
+            membersData.forEach((_, index) => updateMemberFromForm(index));
+            const jsonStr = JSON.stringify(membersData, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '妙脆苑成员数据.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ==================== 导入 JSON ====================
+        function importJson(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!Array.isArray(data)) throw new Error('数据格式错误');
+                    // 验证基本结构
+                    data.forEach((item, idx) => {
+                        if (!item.name || !item.group || !item.skills) {
+                            throw new Error(`第 ${idx+1} 个成员缺少必要字段`);
+                        }
+                    });
+                    membersData = data;
+                    // 更新 nextId
+                    const maxId = Math.max(...membersData.map(m => m.id || 0), 0);
+                    nextId = maxId + 1;
+                    renderAllMembers();
+                    alert(`成功导入 ${membersData.length} 位成员数据！`);
+                } catch (err) {
+                    alert('导入失败：' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            document.getElementById('importFileInput').value = '';
+        }
+
+        // ==================== 初始化 ====================
+        function init() {
+            // 尝试从 localStorage 恢复数据
+            const saved = localStorage.getItem('editor_members_data');
+            if (saved) {
+                try {
+                    membersData = JSON.parse(saved);
+                    const maxId = Math.max(...membersData.map(m => m.id || 0), 0);
+                    nextId = maxId + 1;
+                } catch (e) {
+                    membersData = [];
+                    initDemoData();
+                }
+            } else {
+                initDemoData();
+            }
+            renderAllMembers();
+
+            // 自动保存到 localStorage
+            window.addEventListener('beforeunload', () => {
+                localStorage.setItem('editor_members_data', JSON.stringify(membersData));
+            });
+            setInterval(() => {
+                localStorage.setItem('editor_members_data', JSON.stringify(membersData));
+            }, 5000);
+        }
+
+        // 事件绑定
+        document.getElementById('btnAddMember').addEventListener('click', addNewMember);
+        document.getElementById('btnExportJson').addEventListener('click', exportJson);
+        document.getElementById('btnImportJson').addEventListener('click', () => {
+            document.getElementById('importFileInput').click();
+        });
+        document.getElementById('importFileInput').addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                importJson(e.target.files[0]);
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>
